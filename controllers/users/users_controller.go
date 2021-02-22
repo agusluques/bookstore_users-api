@@ -11,7 +11,7 @@ import (
 )
 
 func GetUser(c *gin.Context) {
-	userId, userErr := strconv.ParseInt(c.Param("user_id"), 10, 64)
+	userID, userErr := strconv.ParseInt(c.Param("user_id"), 10, 64)
 
 	if userErr != nil {
 		restErr := errors.NewBadRequestError("invalid user_id")
@@ -19,7 +19,7 @@ func GetUser(c *gin.Context) {
 		return
 	}
 
-	result, getErr := services.GetUser(userId)
+	result, getErr := services.GetUser(userID)
 	if getErr != nil {
 		c.JSON(getErr.Status, getErr)
 		return
@@ -48,4 +48,32 @@ func CreateUser(c *gin.Context) {
 
 func SearchUser(c *gin.Context) {
 	c.JSON(http.StatusNotImplemented, gin.H{})
+}
+
+func UpdateUser(c *gin.Context) {
+	userID, userErr := strconv.ParseInt(c.Param("user_id"), 10, 64)
+	if userErr != nil {
+		restErr := errors.NewBadRequestError("invalid user_id")
+		c.JSON(restErr.Status, restErr)
+		return
+	}
+
+	var user users.User
+	if err := c.ShouldBindJSON(&user); err != nil {
+		restErr := errors.NewBadRequestError("invalid json object")
+		c.JSON(restErr.Status, restErr)
+		return
+	}
+
+	user.ID = userID
+
+	isPartial := c.Request.Method == http.MethodPatch
+
+	result, updateErr := services.UpdateUser(isPartial, &user)
+	if updateErr != nil {
+		c.JSON(updateErr.Status, updateErr)
+		return
+	}
+
+	c.JSON(http.StatusOK, result)
 }
