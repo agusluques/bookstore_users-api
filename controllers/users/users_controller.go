@@ -10,11 +10,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func GetUser(c *gin.Context) {
-	userID, userErr := strconv.ParseInt(c.Param("user_id"), 10, 64)
-
-	if userErr != nil {
-		restErr := errors.NewBadRequestError("invalid user_id")
+func Get(c *gin.Context) {
+	userID, restErr := getUserId(c.Param("user_id"))
+	if restErr != nil {
 		c.JSON(restErr.Status, restErr)
 		return
 	}
@@ -28,7 +26,7 @@ func GetUser(c *gin.Context) {
 	c.JSON(http.StatusOK, result)
 }
 
-func CreateUser(c *gin.Context) {
+func Create(c *gin.Context) {
 	var user users.User
 
 	if err := c.ShouldBindJSON(&user); err != nil {
@@ -46,14 +44,9 @@ func CreateUser(c *gin.Context) {
 	c.JSON(http.StatusCreated, result)
 }
 
-func SearchUser(c *gin.Context) {
-	c.JSON(http.StatusNotImplemented, gin.H{})
-}
-
-func UpdateUser(c *gin.Context) {
-	userID, userErr := strconv.ParseInt(c.Param("user_id"), 10, 64)
-	if userErr != nil {
-		restErr := errors.NewBadRequestError("invalid user_id")
+func Update(c *gin.Context) {
+	userID, restErr := getUserId(c.Param("user_id"))
+	if restErr != nil {
 		c.JSON(restErr.Status, restErr)
 		return
 	}
@@ -76,4 +69,43 @@ func UpdateUser(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, result)
+}
+
+func Delete(c *gin.Context) {
+	userID, restErr := getUserId(c.Param("user_id"))
+	if restErr != nil {
+		c.JSON(restErr.Status, restErr)
+		return
+	}
+	if err := services.DeleteUser(userID); err != nil {
+		c.JSON(err.Status, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"status": "deleted"})
+}
+
+func Search(c *gin.Context) {
+	status := c.Query("status")
+	if status == "" {
+		c.JSON(http.StatusBadRequest, "status should not be empty")
+		return
+	}
+
+	result, getErr := services.Search(status)
+	if getErr != nil {
+		c.JSON(getErr.Status, getErr)
+		return
+	}
+
+	c.JSON(http.StatusOK, result)
+}
+
+func getUserId(userIdParam string) (int64, *errors.RestError) {
+	userID, userErr := strconv.ParseInt(userIdParam, 10, 64)
+	if userErr != nil {
+		return 0, errors.NewBadRequestError("invalid user_id")
+	}
+
+	return userID, nil
 }

@@ -1,16 +1,19 @@
 package users
 
 import (
+	"log"
+
 	"github.com/agusluques/bookstore_users-api/datasources/mysql/users_db"
-	utils "github.com/agusluques/bookstore_users-api/utils/date_utils"
 	"github.com/agusluques/bookstore_users-api/utils/errors"
 	"github.com/agusluques/bookstore_users-api/utils/mysql_utils"
 )
 
 const (
-	queryInsertUser = "INSERT INTO users(first_name, last_name, email, date_created) VALUES(?,?,?,?);"
-	queryGetUser    = "SELECT id, first_name, last_name, email, date_created FROM users WHERE id=?;"
-	queryUpdateUser = "UPDATE users SET first_name=?, last_name=?, email=? WHERE id=?;"
+	queryInsertUser       = "INSERT INTO users(first_name, last_name, email, date_created, status, password) VALUES(?,?,?,?,?,?);"
+	queryGetUser          = "SELECT id, first_name, last_name, email, date_created, status FROM users WHERE id=?;"
+	queryUpdateUser       = "UPDATE users SET first_name=?, last_name=?, email=? WHERE id=?;"
+	queryDeleteUser       = "DELETE FROM users WHERE id=?;"
+	queryFindUserByStatus = "SELECT id, first_name, last_name, email, date_created, status FROM users WHERE status=?;"
 )
 
 func (user *User) Get() *errors.RestError {
@@ -21,7 +24,7 @@ func (user *User) Get() *errors.RestError {
 	defer stmt.Close()
 
 	result := stmt.QueryRow(user.ID)
-	if getErr := result.Scan(&user.ID, &user.FirstName, &user.LastName, &user.Email, &user.DateCreated); getErr != nil {
+	if getErr := result.Scan(&user.ID, &user.FirstName, &user.LastName, &user.Email, &user.DateCreated, &user.Status); getErr != nil {
 		return mysql_utils.ParseError(getErr)
 	}
 
@@ -35,10 +38,9 @@ func (user *User) Save() *errors.RestError {
 	}
 	defer stmt.Close()
 
-	user.DateCreated = utils.GetNowString()
-
-	insertResult, saveErr := stmt.Exec(user.FirstName, user.LastName, user.Email, user.DateCreated)
+	insertResult, saveErr := stmt.Exec(user.FirstName, user.LastName, user.Email, user.DateCreated, user.Status, user.Password)
 	if saveErr != nil {
+		log.Fatal(saveErr.Error())
 		return mysql_utils.ParseError(saveErr)
 	}
 
@@ -49,7 +51,7 @@ func (user *User) Save() *errors.RestError {
 
 	user.ID = userID
 
-	return nil
+	return user.Get()
 }
 
 func (user *User) Update() *errors.RestError {
@@ -65,4 +67,45 @@ func (user *User) Update() *errors.RestError {
 	}
 
 	return nil
+}
+
+func (user *User) Delete() *errors.RestError {
+	stmt, err := users_db.Client.Prepare(queryDeleteUser)
+	if err != nil {
+		return errors.NewInternalServerError(err.Error())
+	}
+	defer stmt.Close()
+
+	_, deleteErr := stmt.Exec(user.ID)
+	if deleteErr != nil {
+		return mysql_utils.ParseError(deleteErr)
+	}
+
+	return nil
+}
+
+func FindByStatus(status string) ([]User, *errors.RestError) {
+	stmt, err := users_db.Client.Prepare(queryFindUserByStatus)
+	if err != nil {
+		return nil, errors.NewInternalServerError(err.Error())
+	}
+	defer stmt.Close()
+
+	rows, err := stmt.Query(status)
+	if err != nil {
+		return nil, mysql_utils.ParseError(err)
+	}
+	defer rows.Close()
+
+	var results = make([]User, 0)
+	for rows.Next() {
+		var user User
+
+		if getErr := rows.Scan(&user.ID, &user.FirstName, &user.LastName, &user.Email, &user.DateCreated, &user.Status); getErr != nil {
+			return nil, mysql_utils.ParseError(getErr)
+		}
+		results = append(results, user)
+	}
+
+	return results, nil
 }
