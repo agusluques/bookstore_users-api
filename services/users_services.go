@@ -2,13 +2,27 @@ package services
 
 import (
 	"github.com/agusluques/bookstore_users-api/domain/users"
+	"github.com/agusluques/bookstore_users-api/utils/crypto_utils"
 	utils "github.com/agusluques/bookstore_users-api/utils/date_utils"
 	"github.com/agusluques/bookstore_users-api/utils/errors"
 )
 
-func GetUser(userId int64) (*users.User, *errors.RestError) {
+// UsersService variable
+var UsersService usersServiceInterface = &usersService{}
+
+type usersService struct{}
+
+type usersServiceInterface interface {
+	Get(int64) (*users.User, *errors.RestError)
+	Create(*users.User) (*users.User, *errors.RestError)
+	Update(bool, *users.User) (*users.User, *errors.RestError)
+	DeleteUser(int64) *errors.RestError
+	Search(string) (users.Users, *errors.RestError)
+}
+
+func (s *usersService) Get(userID int64) (*users.User, *errors.RestError) {
 	user := users.User{
-		ID: userId,
+		ID: userID,
 	}
 
 	if err := user.Get(); err != nil {
@@ -18,13 +32,14 @@ func GetUser(userId int64) (*users.User, *errors.RestError) {
 	return &user, nil
 }
 
-func CreateUser(user *users.User) (*users.User, *errors.RestError) {
+func (s *usersService) Create(user *users.User) (*users.User, *errors.RestError) {
 	if err := user.Validate(); err != nil {
 		return nil, err
 	}
 
 	user.DateCreated = utils.GetNowDBString()
 	user.Status = users.StatusActive
+	user.Password = crypto_utils.GetMd5(user.Password)
 
 	if err := user.Save(); err != nil {
 		return nil, err
@@ -33,8 +48,8 @@ func CreateUser(user *users.User) (*users.User, *errors.RestError) {
 	return user, nil
 }
 
-func UpdateUser(isPartial bool, user *users.User) (*users.User, *errors.RestError) {
-	currentUser, err := GetUser(user.ID)
+func (s *usersService) Update(isPartial bool, user *users.User) (*users.User, *errors.RestError) {
+	currentUser, err := UsersService.Get(user.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -62,8 +77,8 @@ func UpdateUser(isPartial bool, user *users.User) (*users.User, *errors.RestErro
 	return currentUser, nil
 }
 
-func DeleteUser(userId int64) *errors.RestError {
-	user, err := GetUser(userId)
+func (s *usersService) DeleteUser(userID int64) *errors.RestError {
+	user, err := UsersService.Get(userID)
 	if err != nil {
 		return err
 	}
@@ -75,11 +90,11 @@ func DeleteUser(userId int64) *errors.RestError {
 	return nil
 }
 
-func Search(status string) (*[]users.User, *errors.RestError) {
+func (s *usersService) Search(status string) (users.Users, *errors.RestError) {
 	users, err := users.FindByStatus(status)
 	if err != nil {
 		return nil, err
 	}
 
-	return &users, nil
+	return users, nil
 }

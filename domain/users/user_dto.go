@@ -7,9 +7,11 @@ import (
 )
 
 const (
+	// StatusActive enum
 	StatusActive = "active"
 )
 
+// User struct
 type User struct {
 	ID          int64  `json:"id"`
 	FirstName   string `json:"first_name"`
@@ -20,6 +22,10 @@ type User struct {
 	Password    string `json:"password"`
 }
 
+// Users is a slice of User
+type Users []User
+
+// Validate an user
 func (u *User) Validate() *errors.RestError {
 	u.FirstName = strings.TrimSpace(u.FirstName)
 	u.LastName = strings.TrimSpace(u.LastName)

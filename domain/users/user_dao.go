@@ -1,8 +1,6 @@
 package users
 
 import (
-	"log"
-
 	"github.com/agusluques/bookstore_users-api/datasources/mysql/users_db"
 	"github.com/agusluques/bookstore_users-api/utils/errors"
 	"github.com/agusluques/bookstore_users-api/utils/mysql_utils"
@@ -16,6 +14,7 @@ const (
 	queryFindUserByStatus = "SELECT id, first_name, last_name, email, date_created, status FROM users WHERE status=?;"
 )
 
+// Get an user
 func (user *User) Get() *errors.RestError {
 	stmt, err := users_db.Client.Prepare(queryGetUser)
 	if err != nil {
@@ -31,6 +30,7 @@ func (user *User) Get() *errors.RestError {
 	return nil
 }
 
+// Save an user
 func (user *User) Save() *errors.RestError {
 	stmt, err := users_db.Client.Prepare(queryInsertUser)
 	if err != nil {
@@ -40,7 +40,6 @@ func (user *User) Save() *errors.RestError {
 
 	insertResult, saveErr := stmt.Exec(user.FirstName, user.LastName, user.Email, user.DateCreated, user.Status, user.Password)
 	if saveErr != nil {
-		log.Fatal(saveErr.Error())
 		return mysql_utils.ParseError(saveErr)
 	}
 
@@ -54,6 +53,7 @@ func (user *User) Save() *errors.RestError {
 	return user.Get()
 }
 
+// Update an user
 func (user *User) Update() *errors.RestError {
 	stmt, err := users_db.Client.Prepare(queryUpdateUser)
 	if err != nil {
@@ -69,6 +69,7 @@ func (user *User) Update() *errors.RestError {
 	return nil
 }
 
+// Delete an user
 func (user *User) Delete() *errors.RestError {
 	stmt, err := users_db.Client.Prepare(queryDeleteUser)
 	if err != nil {
@@ -84,6 +85,7 @@ func (user *User) Delete() *errors.RestError {
 	return nil
 }
 
+// FindByStatus an user
 func FindByStatus(status string) ([]User, *errors.RestError) {
 	stmt, err := users_db.Client.Prepare(queryFindUserByStatus)
 	if err != nil {
