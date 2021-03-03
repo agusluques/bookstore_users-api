@@ -19,6 +19,7 @@ const (
 )
 
 var (
+	// Client of the db
 	Client   *sql.DB
 	username = os.Getenv(mysqlUsersUsername)
 	password = os.Getenv(mysqlUsersPassword)
