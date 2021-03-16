@@ -7,7 +7,7 @@ import (
 	"github.com/agusluques/bookstore_oauth-go/oauth"
 	"github.com/agusluques/bookstore_users-api/domain/users"
 	"github.com/agusluques/bookstore_users-api/services"
-	"github.com/agusluques/bookstore_users-api/utils/errors"
+	"github.com/agusluques/bookstore_utils-go/rest_errors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -43,7 +43,7 @@ func Create(c *gin.Context) {
 	var user users.User
 
 	if err := c.ShouldBindJSON(&user); err != nil {
-		restErr := errors.NewBadRequestError("invalid json object")
+		restErr := rest_errors.NewBadRequestError("invalid json object")
 		c.JSON(restErr.Status, restErr)
 		return
 	}
@@ -67,7 +67,7 @@ func Update(c *gin.Context) {
 
 	var user users.User
 	if err := c.ShouldBindJSON(&user); err != nil {
-		restErr := errors.NewBadRequestError("invalid json object")
+		restErr := rest_errors.NewBadRequestError("invalid json object")
 		c.JSON(restErr.Status, restErr)
 		return
 	}
@@ -121,7 +121,7 @@ func Search(c *gin.Context) {
 func Login(c *gin.Context) {
 	var request users.LoginRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
-		restErr := errors.NewBadRequestError("invalid json object")
+		restErr := rest_errors.NewBadRequestError("invalid json object")
 		c.JSON(restErr.Status, restErr)
 		return
 	}
@@ -135,10 +135,10 @@ func Login(c *gin.Context) {
 	c.JSON(http.StatusOK, result.Marshall(c.GetHeader("X-Public") == "true"))
 }
 
-func getUserID(userIDParam string) (int64, *errors.RestError) {
+func getUserID(userIDParam string) (int64, *rest_errors.RestError) {
 	userID, userErr := strconv.ParseInt(userIDParam, 10, 64)
 	if userErr != nil {
-		return 0, errors.NewBadRequestError("invalid user_id")
+		return 0, rest_errors.NewBadRequestError("invalid user_id")
 	}
 
 	return userID, nil

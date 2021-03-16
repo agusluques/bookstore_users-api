@@ -4,7 +4,7 @@ import (
 	"github.com/agusluques/bookstore_users-api/domain/users"
 	"github.com/agusluques/bookstore_users-api/utils/crypto_utils"
 	utils "github.com/agusluques/bookstore_users-api/utils/date_utils"
-	"github.com/agusluques/bookstore_users-api/utils/errors"
+	"github.com/agusluques/bookstore_utils-go/rest_errors"
 )
 
 // UsersService variable
@@ -13,15 +13,15 @@ var UsersService usersServiceInterface = &usersService{}
 type usersService struct{}
 
 type usersServiceInterface interface {
-	Get(int64) (*users.User, *errors.RestError)
-	Create(*users.User) (*users.User, *errors.RestError)
-	Update(bool, *users.User) (*users.User, *errors.RestError)
-	DeleteUser(int64) *errors.RestError
-	Search(string) (users.Users, *errors.RestError)
-	LoginUser(users.LoginRequest) (*users.User, *errors.RestError)
+	Get(int64) (*users.User, *rest_errors.RestError)
+	Create(*users.User) (*users.User, *rest_errors.RestError)
+	Update(bool, *users.User) (*users.User, *rest_errors.RestError)
+	DeleteUser(int64) *rest_errors.RestError
+	Search(string) (users.Users, *rest_errors.RestError)
+	LoginUser(users.LoginRequest) (*users.User, *rest_errors.RestError)
 }
 
-func (s *usersService) Get(userID int64) (*users.User, *errors.RestError) {
+func (s *usersService) Get(userID int64) (*users.User, *rest_errors.RestError) {
 	user := users.User{
 		ID: userID,
 	}
@@ -33,7 +33,7 @@ func (s *usersService) Get(userID int64) (*users.User, *errors.RestError) {
 	return &user, nil
 }
 
-func (s *usersService) Create(user *users.User) (*users.User, *errors.RestError) {
+func (s *usersService) Create(user *users.User) (*users.User, *rest_errors.RestError) {
 	if err := user.Validate(); err != nil {
 		return nil, err
 	}
@@ -49,7 +49,7 @@ func (s *usersService) Create(user *users.User) (*users.User, *errors.RestError)
 	return user, nil
 }
 
-func (s *usersService) Update(isPartial bool, user *users.User) (*users.User, *errors.RestError) {
+func (s *usersService) Update(isPartial bool, user *users.User) (*users.User, *rest_errors.RestError) {
 	currentUser, err := UsersService.Get(user.ID)
 	if err != nil {
 		return nil, err
@@ -78,7 +78,7 @@ func (s *usersService) Update(isPartial bool, user *users.User) (*users.User, *e
 	return currentUser, nil
 }
 
-func (s *usersService) DeleteUser(userID int64) *errors.RestError {
+func (s *usersService) DeleteUser(userID int64) *rest_errors.RestError {
 	user, err := UsersService.Get(userID)
 	if err != nil {
 		return err
@@ -91,7 +91,7 @@ func (s *usersService) DeleteUser(userID int64) *errors.RestError {
 	return nil
 }
 
-func (s *usersService) Search(status string) (users.Users, *errors.RestError) {
+func (s *usersService) Search(status string) (users.Users, *rest_errors.RestError) {
 	users, err := users.FindByStatus(status)
 	if err != nil {
 		return nil, err
@@ -100,7 +100,7 @@ func (s *usersService) Search(status string) (users.Users, *errors.RestError) {
 	return users, nil
 }
 
-func (s *usersService) LoginUser(req users.LoginRequest) (*users.User, *errors.RestError) {
+func (s *usersService) LoginUser(req users.LoginRequest) (*users.User, *rest_errors.RestError) {
 	dao := &users.User{
 		Email:    req.Email,
 		Password: crypto_utils.GetMd5(req.Password),
