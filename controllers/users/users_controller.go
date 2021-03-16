@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/agusluques/bookstore_oauth-go/oauth"
 	"github.com/agusluques/bookstore_users-api/domain/users"
 	"github.com/agusluques/bookstore_users-api/services"
 	"github.com/agusluques/bookstore_users-api/utils/errors"
@@ -12,6 +13,11 @@ import (
 
 // Get an user
 func Get(c *gin.Context) {
+	if err := oauth.AuthenticateRequest(c.Request); err != nil {
+		c.JSON(err.Status, err)
+		return
+	}
+
 	userID, restErr := getUserID(c.Param("user_id"))
 	if restErr != nil {
 		c.JSON(restErr.Status, restErr)
@@ -24,7 +30,12 @@ func Get(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, result.Marshall(c.GetHeader("X-Public") == "true"))
+	if oauth.GetCallerId(c.Request) == result.ID {
+		c.JSON(http.StatusOK, result.Marshall(false))
+		return
+	}
+
+	c.JSON(http.StatusOK, result.Marshall(oauth.IsPublic(c.Request)))
 }
 
 // Create an user
