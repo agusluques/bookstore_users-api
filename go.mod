@@ -4,7 +4,7 @@ go 1.15
 
 require (
 	github.com/agusluques/bookstore_oauth-go v0.0.0-20210316011208-8acada3091cd
-	github.com/agusluques/bookstore_utils-go v0.0.1
+	github.com/agusluques/bookstore_utils-go v1.0.0
 	github.com/gin-gonic/gin v1.6.3
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/joho/godotenv v1.3.0

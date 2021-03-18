@@ -7,7 +7,8 @@ import (
 	"os"
 
 	// driver import
-	_ "github.com/go-sql-driver/mysql"
+	"github.com/agusluques/bookstore_utils-go/logger"
+	"github.com/go-sql-driver/mysql"
 	_ "github.com/joho/godotenv/autoload"
 )
 
@@ -42,6 +43,7 @@ func init() {
 		panic(err)
 	}
 
+	mysql.SetLogger(logger.GetLogger())
 	log.Println("database successfully connected")
 
 }

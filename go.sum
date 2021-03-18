@@ -4,6 +4,8 @@ github.com/agusluques/bookstore_oauth-go v0.0.0-20210316011208-8acada3091cd h1:E
 github.com/agusluques/bookstore_oauth-go v0.0.0-20210316011208-8acada3091cd/go.mod h1:Vc7SOpSjxDtvJXMUkPZ0CWtXtvHX7lF1czqxHy2rNZE=
 github.com/agusluques/bookstore_utils-go v0.0.1 h1:ztzyww/Dnmp/lmUs6c/qzwgsggYrVkVtHrEf5PpUil8=
 github.com/agusluques/bookstore_utils-go v0.0.1/go.mod h1:xURjEltMfH9+Cu3EKPycw8v4Ye7bgYbCwjbT04YOBTA=
+github.com/agusluques/bookstore_utils-go v1.0.0 h1:fDjub7K5jY9Jba60QxEoldv9NoePY0zTKb/Xhh7uzj4=
+github.com/agusluques/bookstore_utils-go v1.0.0/go.mod h1:EQCDeyComHEeauFbjmjGgwRUqbR9SgkKzDC2Y4udOao=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
